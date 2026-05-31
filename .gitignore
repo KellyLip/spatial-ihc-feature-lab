@@ -216,3 +216,36 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ==========================================
+# Spatial IHC Feature Lab - Custom Ignores
+# ==========================================
+
+# 1. Raw and Processed Data
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# 2. Large Images
+*.tiff
+*.tif
+*.svs
+*.ndpi
+*.qptiff
+*.png
+*.jpg
+!reports/figures/*.png  # Allow tiny report figures to be tracked
+
+# 3. Model Weights & Checkpoints
+*.pt
+*.pth
+*.h5
+*.hdf5
+*.pkl
+models/
+checkpoints/
+
+# 4. Logs
+logs/
+*.log
