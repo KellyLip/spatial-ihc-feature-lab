@@ -1,0 +1,24 @@
+name: spatial-ihc
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - jupyter
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - scikit-image
+  - matplotlib
+  - plotly
+  - networkx
+  - shap
+  - streamlit
+  - pytorch
+  - torchvision
+  - pip
+  - pip:
+    - opencv-python
+    - timm
