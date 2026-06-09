@@ -64,8 +64,6 @@ data/
         ...
 ```
 
-The exact TIFF file names may vary depending on the downloaded package. If the names differ, keep the original names and update the data-loading code accordingly rather than renaming files manually.
-
 ## Expected files
 
 ### `cellData.csv`
@@ -85,9 +83,11 @@ The cell object identifier links rows in the table to segmented objects in the l
 
 ### `patient_class.csv`
 
-Patient-level class labels.
+Patient-level class labels that maps to the three spatial immune phenotypes:
 
-This file maps each patient/sample to a class label. These labels are useful for patient-level or sample-level modeling tasks.
+* Cold (Desert)
+* Compartmentalized
+* Mixed
 
 ### Labeled cell segmentation TIFFs
 
@@ -111,25 +111,3 @@ The processed data already contains per-cell marker expression values, so the ra
 * figure generation
 * comparison between raw marker signal and processed cell-level values
 * image-level analysis
-
-## Git policy
-
-Do not commit raw data or large generated files.
-
-The following paths and file types should remain ignored by Git:
-
-```text
-data/raw/
-data/processed/
-*.tif
-*.tiff
-*.svs
-*.ndpi
-*.qptiff
-*.pt
-*.pth
-*.h5
-*.pkl
-```
-
-Only lightweight documentation, small example files, and code should be tracked in Git.
