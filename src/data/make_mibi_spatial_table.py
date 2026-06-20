@@ -61,7 +61,7 @@ def main() -> None:
     # -----------------------------
     # patient_class.csv has no header:
     # Column 1 = SampleID
-    # Column 2 = patient_class
+    # Column 2 = patient_class (0=mixed, 1=compartmentalized, 2=cold)
 
     if not PATIENT_CLASS_PATH.exists():
         raise FileNotFoundError(f"Missing file: {PATIENT_CLASS_PATH}")

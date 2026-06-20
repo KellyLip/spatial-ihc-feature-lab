@@ -62,9 +62,14 @@ data/
         p1_cellType.tiff
         p2_cellType.tiff
         ...
+  processed/
+    mibi_cell_centroids.csv
+    mibi_cellData_with_patient_class_and_centroids.csv
 ```
 
-## Expected files
+Processed files under `data/processed/` are generated locally by the pipeline in `src/data/` and are not committed to Git.
+
+## Expected raw files
 
 ### `cellData.csv`
 
@@ -72,34 +77,71 @@ Cell-level table containing information for cells across patients.
 
 Expected contents include:
 
-* patient/sample identifier
-* cell object identifier within the image
+* patient/sample identifier (`SampleID`)
+* cell object identifier within the image (`cellLabelInImage`)
 * cell size
 * marker expression values
-* broad cell classification
+* broad cell classification (`Group`, `tumorYN`, etc.)
 * immune-cell subclassification, where available
 
 The cell object identifier links rows in the table to segmented objects in the labeled cell TIFF images.
 
+**Note:** The raw file contains **43** SampleIDs (1–41 except 30, plus 42–44). Sample **30** has no cell rows. Samples **42–44** have cell rows but no entry in `patient_class.csv`.
+
 ### `patient_class.csv`
 
-Patient-level class labels that maps to the three spatial immune phenotypes:
+Headerless two-column file: `SampleID`, `patient_class`.
 
-* Cold (Desert)
-* Compartmentalized
-* Mixed
+Patient-level labels for the three spatial immune phenotypes:
+
+| Code | Label |
+|------|-------|
+| 0 | mixed |
+| 1 | compartmentalized |
+| 2 | cold |
+
+This file lists **41** samples (SampleIDs 1–41).
 
 ### Labeled cell segmentation TIFFs
 
 TIFF images where each segmented cell has a unique integer ID.
 
-These images are used to connect tabular cell-level data back to the physical layout of cells in the tissue image.
+These images are used to extract cell centroids and connect tabular cell-level data back to the physical layout of cells in the tissue image. The repository expects **41** mask files (`p1`–`p41`).
 
 ### Cell-type label TIFFs
 
 TIFF images where each cell is assigned a biological cell-type label.
 
-These files are useful for visual inspection, sanity checks, and validating that cell-type annotations align with the segmentation masks.
+These files are useful for visual inspection, sanity checks, and validating that cell-type annotations align with the segmentation masks. They are not required for the current tabular/spatial pipeline.
+
+## Processed outputs
+
+After raw data is in place, run from the repository root:
+
+```bash
+python src/data/extract_mibi_centroids.py
+python src/data/make_mibi_spatial_table.py
+```
+
+| File | Description |
+|------|-------------|
+| `mibi_cell_centroids.csv` | Centroids and mask areas per `(sample_id, cell_label)` from labeled masks |
+| `mibi_cellData_with_patient_class_and_centroids.csv` | Master analysis table: expression, annotations, patient class, and coordinates |
+
+The master table retains **40** samples: all labeled samples except sample 30 (no `cellData` rows) and samples 42–44 (excluded explicitly; no patient-class label).
+
+Label mappings used during analysis are defined in `src/data/mibi_constants.py`.
+
+## Data QC
+
+Overlap between `cellData.csv`, centroids, and masks is checked in `notebooks/02_centroids_overlap_check.ipynb`. Summary tables are written to `reports/tables/`, including:
+
+* `cell_mask_overlap_summary.csv` — row-level overlap counts
+* `cell_rows_without_centroids_by_sample.csv` — `cellData` rows missing a mask match (samples 42–44)
+* `mask_objects_without_cellData_by_sample.csv` — mask objects not present in `cellData.csv`
+* `mask_only_samples_no_cellData.csv` — samples with a mask but zero `cellData` rows (sample 30)
+
+Run `python src/data/check_mibi_master_table.py` after building the master table to regenerate QC tables and summary figures in `reports/tables/` and `reports/figures/`.
 
 ## Files not required initially
 

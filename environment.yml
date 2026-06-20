@@ -12,6 +12,7 @@ dependencies:
   - scikit-learn
   - scikit-image
   - matplotlib
+  - seaborn
   - plotly
   - networkx
   - shap
