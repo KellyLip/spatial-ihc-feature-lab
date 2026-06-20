@@ -1,0 +1,4 @@
+split,n_rows,n_groups,class_0_groups,class_1_groups,class_2_groups
+test,44697,8,4,3,1
+train,114670,24,11,9,4
+val,38311,8,4,3,1
