@@ -11,6 +11,8 @@ A reproducible computational pathology repository demonstrating how to engineer 
 
 For the rationale behind dataset choices, see [`reports/dataset_rationale.md`](reports/dataset_rationale.md).
 
+For prediction targets and split strategy, see [`reports/targets_and_splits.md`](reports/targets_and_splits.md).
+
 ## Repository Layout
 
 ```text
@@ -19,9 +21,12 @@ spatial-ihc-feature-lab/
   notebooks/             Exploratory analysis and QC notebooks
   reports/
     figures/             Generated plots from scripts and notebooks
-    tables/              QC summaries and EDA tables
+    tables/              QC summaries, EDA tables, and split summaries
     dataset_rationale.md Project note on MIBI vs MIHIC strategy
-  src/data/              MIBI-TNBC data preparation and QC scripts
+    targets_and_splits.md Prediction targets and leakage-safe split rules
+  src/
+    data/                MIBI-TNBC data preparation and QC scripts
+    utils/               Shared utilities (train/val/test splits)
   environment.yml        Conda environment definition
 ```
 
@@ -44,6 +49,7 @@ Run the scripts in order after raw data is in place:
 python src/data/extract_mibi_centroids.py
 python src/data/make_mibi_spatial_table.py
 python src/data/check_mibi_master_table.py
+python src/data/make_mibi_splits.py
 ```
 
 | Step | Script | Output |
@@ -51,8 +57,9 @@ python src/data/check_mibi_master_table.py
 | 1 | `extract_mibi_centroids.py` | `data/processed/mibi_cell_centroids.csv` |
 | 2 | `make_mibi_spatial_table.py` | `data/processed/mibi_cellData_with_patient_class_and_centroids.csv` |
 | 3 | `check_mibi_master_table.py` | QC tables in `reports/tables/` and summary figures in `reports/figures/` |
+| 4 | `make_mibi_splits.py` | `data/processed/mibi_cells_with_splits.csv` and `reports/tables/split_summary.csv` |
 
-Shared label mappings (`patient_class`, cell groups, immune groups) live in `src/data/mibi_constants.py` and are imported by scripts and notebooks.
+Shared label mappings (`patient_class`, cell groups, immune groups) live in `src/data/mibi_constants.py`. Leakage-safe split utilities live in `src/utils/splits.py`.
 
 ### Master table
 
@@ -77,6 +84,22 @@ Patient phenotype codes:
 | 1 | compartmentalized |
 | 2 | cold |
 
+### Targets and splits
+
+The primary modeling target is **`patient_class`** (sample-level spatial immune architecture). A secondary target is **cell phenotype** (`Group`, `immuneGroup`).
+
+Splits are performed at the **`SampleID` level** so all cells from the same sample stay in one split. The default train/validation/test assignment uses stratified group splitting on `patient_class` (20% test, 20% validation, `random_state=42`).
+
+Current split sizes (40 samples → 24 train / 8 val / 8 test):
+
+| Split | Cells | Samples | mixed | compartmentalized | cold |
+|-------|------:|--------:|------:|------------------:|-----:|
+| train | 114,670 | 24 | 11 | 9 | 4 |
+| val | 38,311 | 8 | 4 | 3 | 1 |
+| test | 44,697 | 8 | 4 | 3 | 1 |
+
+See [`reports/targets_and_splits.md`](reports/targets_and_splits.md) for target definitions, leakage rules, and planned evaluation metrics.
+
 ## Notebooks
 
 | Notebook | Purpose |
@@ -85,14 +108,15 @@ Patient phenotype codes:
 | `01_mibi_spatial_eda.ipynb` | Raw MIBI TIFF channel inspection |
 | `02_centroids_overlap_check.ipynb` | QC overlap between `cellData.csv`, centroids, and masks; includes mask-only sample checks |
 | `03_mibi_comprehensive_eda.ipynb` | Extensive EDA on the master table (phenotypes, markers, spatial layout) |
+| `04_split_summary.ipynb` | Inspect and validate the stratified sample-level train/val/test split |
 
-Run notebooks from the `notebooks/` directory or ensure the project root resolves correctly so paths to `data/` and `src/data/` work.
+Run notebooks from the `notebooks/` directory or ensure the project root resolves correctly so paths to `data/` and `src/` work.
 
 ## Generated Reports
 
 **Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
 
-**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, and cell–mask overlap QC (`cell_mask_overlap_summary.csv`, `mask_only_samples_no_cellData.csv`, etc.).
+**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, cell–mask overlap QC, and `split_summary.csv`.
 
 ## Current Status
 
@@ -102,8 +126,10 @@ Completed for MIBI-TNBC:
 * Master table construction with patient labels and spatial coordinates
 * Overlap QC between tabular cell data and segmentation masks
 * Summary QC figures and comprehensive EDA notebook
+* Prediction target definition and leakage-safe split strategy (`reports/targets_and_splits.md`)
+* Stratified sample-level train/val/test splits (`make_mibi_splits.py`, `src/utils/splits.py`)
 
 Planned next steps:
 
 * Spatial feature engineering (distances, neighborhood densities, graphs)
-* Interpretable ML models for patient phenotype prediction
+* Interpretable ML models for `patient_class` prediction using sample-level spatial features

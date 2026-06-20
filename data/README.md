@@ -65,6 +65,7 @@ data/
   processed/
     mibi_cell_centroids.csv
     mibi_cellData_with_patient_class_and_centroids.csv
+    mibi_cells_with_splits.csv
 ```
 
 Processed files under `data/processed/` are generated locally by the pipeline in `src/data/` and are not committed to Git.
@@ -121,16 +122,30 @@ After raw data is in place, run from the repository root:
 ```bash
 python src/data/extract_mibi_centroids.py
 python src/data/make_mibi_spatial_table.py
+python src/data/make_mibi_splits.py
 ```
 
 | File | Description |
 |------|-------------|
 | `mibi_cell_centroids.csv` | Centroids and mask areas per `(sample_id, cell_label)` from labeled masks |
 | `mibi_cellData_with_patient_class_and_centroids.csv` | Master analysis table: expression, annotations, patient class, and coordinates |
+| `mibi_cells_with_splits.csv` | Master table plus a `split` column (`train` / `val` / `test`) assigned by `SampleID` |
 
 The master table retains **40** samples: all labeled samples except sample 30 (no `cellData` rows) and samples 42–44 (excluded explicitly; no patient-class label).
 
 Label mappings used during analysis are defined in `src/data/mibi_constants.py`.
+
+### Train/validation/test splits
+
+Created by `src/data/make_mibi_splits.py` using `src/utils/splits.py`.
+
+* **Group column:** `SampleID` — all cells from a sample share the same split
+* **Stratification target:** `patient_class` (constant within each sample)
+* **Default sizes:** 20% test, 20% validation, remainder train (`random_state=42`)
+
+Split balance is summarized in `reports/tables/split_summary.csv`. Target definitions and leakage rules are documented in [`reports/targets_and_splits.md`](../reports/targets_and_splits.md).
+
+You can also inspect the split interactively in `notebooks/04_split_summary.ipynb`.
 
 ## Data QC
 
