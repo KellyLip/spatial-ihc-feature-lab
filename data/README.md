@@ -83,11 +83,11 @@ The cell object identifier links rows in the table to segmented objects in the l
 
 ### `patient_class.csv`
 
-Patient-level class labels that maps to the three spatial immune phenotypes:
+Patient-level class labels for the three spatial immune phenotypes:
 
-* Cold (Desert)
-* Compartmentalized
-* Mixed
+* `0` — mixed
+* `1` — compartmentalized
+* `2` — cold
 
 ### Labeled cell segmentation TIFFs
 

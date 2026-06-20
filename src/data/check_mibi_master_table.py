@@ -15,30 +15,10 @@ MASTER_TABLE_PATH = PROCESSED_DIR / "mibi_cellData_with_patient_class_and_centro
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 TABLES_DIR.mkdir(parents=True, exist_ok=True)
 
+import sys
 
-GROUP_LABELS = {
-    1: "Unidentified",
-    2: "Immune",
-    3: "Endothelial",
-    4: "Mesenchymal-like",
-    5: "Tumor",
-    6: "Keratin-positive tumor",
-}
-
-IMMUNE_GROUP_LABELS = {
-    1: "Tregs",
-    2: "CD4 T",
-    3: "CD8 T",
-    4: "CD3 T",
-    5: "NK",
-    6: "B",
-    7: "Neutrophils",
-    8: "Macrophages",
-    9: "DC",
-    10: "DC/Mono",
-    11: "Mono/Neu",
-    12: "Other immune",
-}
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from mibi_constants import GROUP_LABELS, IMMUNE_GROUP_LABELS, PATIENT_CLASS_LABELS
 
 
 def load_master_table() -> pd.DataFrame:
@@ -121,9 +101,11 @@ def plot_patient_class_distribution(df: pd.DataFrame) -> None:
     sample_level = df[["SampleID", "patient_class"]].drop_duplicates()
 
     counts = sample_level["patient_class"].value_counts().sort_index()
+    labels = [PATIENT_CLASS_LABELS.get(int(x), str(x)) for x in counts.index]
 
-    plt.figure(figsize=(5, 4))
+    plt.figure(figsize=(6, 4))
     counts.plot(kind="bar")
+    plt.xticks(range(len(labels)), labels, rotation=0)
     plt.xlabel("Patient class")
     plt.ylabel("Number of samples")
     plt.title("Patient class distribution")
