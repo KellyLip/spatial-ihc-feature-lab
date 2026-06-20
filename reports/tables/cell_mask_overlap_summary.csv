@@ -1,0 +1,7 @@
+check,n
+"cellData rows with matching centroid, all 44 samples",197678
+"cellData rows without matching centroid, all 44 samples",3978
+"cellData rows with matching centroid, mask-matched samples only",197678
+"cellData rows without matching centroid, mask-matched samples only",0
+mask objects with matching cellData row,197678
+mask objects without matching cellData row,51395
