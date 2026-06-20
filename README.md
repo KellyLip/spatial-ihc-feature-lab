@@ -67,7 +67,7 @@ The analysis table merges:
 * `patient_class.csv` lists **41** SampleIDs (1–41)
 * The master table contains **40** samples with cell-level data
 * **Sample 30** has a segmentation mask but **zero rows in `cellData.csv`**, so it is excluded from the merged table
-* **Samples 42–44** appear in `cellData.csv` but have no patient-class label and are dropped during merge
+* **Samples 42–44** appear in `cellData.csv` but have no patient-class label or TIFF masks and are dropped during merge
 
 Patient phenotype codes:
 
