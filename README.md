@@ -21,11 +21,14 @@ spatial-ihc-feature-lab/
   notebooks/             Exploratory analysis and QC notebooks
   reports/
     figures/             Generated plots from scripts and notebooks
+    metrics/             Model evaluation metrics (CSV)
     tables/              QC summaries, EDA tables, and split summaries
+    cell_classifier_report.md  Summary of cell phenotype baseline results
     dataset_rationale.md Project note on MIBI vs MIHIC strategy
     targets_and_splits.md Prediction targets and leakage-safe split rules
   src/
     data/                MIBI-TNBC data preparation and QC scripts
+    models/              Supervised ML training scripts
     utils/               Shared utilities (train/val/test splits)
   environment.yml        Conda environment definition
 ```
@@ -50,6 +53,7 @@ python src/data/extract_mibi_centroids.py
 python src/data/make_mibi_spatial_table.py
 python src/data/check_mibi_master_table.py
 python src/data/make_mibi_splits.py
+python src/models/train_mibi_cell_classifier.py
 ```
 
 | Step | Script | Output |
@@ -58,6 +62,7 @@ python src/data/make_mibi_splits.py
 | 2 | `make_mibi_spatial_table.py` | `data/processed/mibi_cellData_with_patient_class_and_centroids.csv` |
 | 3 | `check_mibi_master_table.py` | QC tables in `reports/tables/` and summary figures in `reports/figures/` |
 | 4 | `make_mibi_splits.py` | `data/processed/mibi_cells_with_splits.csv` and `reports/tables/split_summary.csv` |
+| 5 | `train_mibi_cell_classifier.py` | Baseline metrics in `reports/metrics/`, confusion matrices in `reports/figures/`, top confusions in `reports/tables/` |
 
 Shared label mappings (`patient_class`, cell groups, immune groups) live in `src/data/mibi_constants.py`. Leakage-safe split utilities live in `src/utils/splits.py`.
 
@@ -100,6 +105,45 @@ Current split sizes (40 samples → 24 train / 8 val / 8 test):
 
 See [`reports/targets_and_splits.md`](reports/targets_and_splits.md) for target definitions, leakage rules, and planned evaluation metrics.
 
+### Cell phenotype classifier
+
+The secondary modeling target is **cell phenotype** (`Group`): predict broad MIBI cell groups from per-cell marker expression only. This is a tabular ML baseline and pipeline validation step, not independent biological discovery. Because the labels are marker-derived, strong performance mainly confirms that the cleaned table, splits, and features are coherent.
+
+Run after splits are created:
+
+```bash
+python src/models/train_mibi_cell_classifier.py
+```
+
+The script trains four baselines on the train split and evaluates on the held-out test split:
+
+| Model | Accuracy | Balanced accuracy | Macro F1 | Weighted F1 |
+|-------|---------:|------------------:|---------:|--------------:|
+| Dummy most frequent | 0.502 | 0.167 | 0.111 | 0.335 |
+| Logistic regression | 0.930 | 0.956 | 0.790 | 0.936 |
+| Random forest | 0.975 | 0.964 | 0.954 | 0.975 |
+| HistGradientBoosting | **0.992** | **0.978** | **0.972** | **0.992** |
+
+Cell groups (`Group`):
+
+| Code | Label |
+|------|-------|
+| 1 | Unidentified |
+| 2 | Immune |
+| 3 | Endothelial |
+| 4 | Mesenchymal-like |
+| 5 | Tumor |
+| 6 | Keratin-positive tumor |
+
+Outputs:
+
+* `reports/metrics/cell_classifier_baseline.csv` — model comparison metrics
+* `reports/metrics/cell_classifier_classification_report.csv` — per-class precision/recall/F1
+* `reports/tables/cell_classifier_top_confusions.csv` — largest off-diagonal confusion pairs
+* `reports/figures/cell_classifier_confusion_matrix_*.png` — confusion matrix plots per model
+
+See [`reports/cell_classifier_report.md`](reports/cell_classifier_report.md) for interpretation of remaining errors and model comparison notes.
+
 ## Notebooks
 
 | Notebook | Purpose |
@@ -114,9 +158,11 @@ Run notebooks from the `notebooks/` directory or ensure the project root resolve
 
 ## Generated Reports
 
-**Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
+**Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, cell-classifier confusion matrices, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
 
-**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, cell–mask overlap QC, and `split_summary.csv`.
+**Metrics** (`reports/metrics/`): cell phenotype classifier baseline and per-class classification reports.
+
+**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, cell–mask overlap QC, `split_summary.csv`, and cell-classifier top confusions.
 
 ## Current Status
 
@@ -128,6 +174,7 @@ Completed for MIBI-TNBC:
 * Summary QC figures and comprehensive EDA notebook
 * Prediction target definition and leakage-safe split strategy (`reports/targets_and_splits.md`)
 * Stratified sample-level train/val/test splits (`make_mibi_splits.py`, `src/utils/splits.py`)
+* Cell phenotype baseline classifier from marker expression (`train_mibi_cell_classifier.py`)
 
 Planned next steps:
 
