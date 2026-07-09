@@ -1,0 +1,121 @@
+model,true_class,true_label,predicted_class,predicted_label,n_cells
+dummy_most_frequent,2,Immune,6,Keratin-positive tumor,18477
+dummy_most_frequent,4,Mesenchymal-like,6,Keratin-positive tumor,1886
+dummy_most_frequent,5,Tumor,6,Keratin-positive tumor,1311
+dummy_most_frequent,3,Endothelial,6,Keratin-positive tumor,354
+dummy_most_frequent,1,Unidentified,6,Keratin-positive tumor,240
+dummy_most_frequent,1,Unidentified,3,Endothelial,0
+dummy_most_frequent,2,Immune,1,Unidentified,0
+dummy_most_frequent,2,Immune,3,Endothelial,0
+dummy_most_frequent,2,Immune,4,Mesenchymal-like,0
+dummy_most_frequent,2,Immune,5,Tumor,0
+dummy_most_frequent,3,Endothelial,1,Unidentified,0
+dummy_most_frequent,1,Unidentified,4,Mesenchymal-like,0
+dummy_most_frequent,1,Unidentified,5,Tumor,0
+dummy_most_frequent,1,Unidentified,2,Immune,0
+dummy_most_frequent,3,Endothelial,5,Tumor,0
+dummy_most_frequent,3,Endothelial,4,Mesenchymal-like,0
+dummy_most_frequent,3,Endothelial,2,Immune,0
+dummy_most_frequent,4,Mesenchymal-like,2,Immune,0
+dummy_most_frequent,4,Mesenchymal-like,3,Endothelial,0
+dummy_most_frequent,4,Mesenchymal-like,5,Tumor,0
+dummy_most_frequent,5,Tumor,1,Unidentified,0
+dummy_most_frequent,4,Mesenchymal-like,1,Unidentified,0
+dummy_most_frequent,5,Tumor,2,Immune,0
+dummy_most_frequent,5,Tumor,3,Endothelial,0
+dummy_most_frequent,5,Tumor,4,Mesenchymal-like,0
+dummy_most_frequent,6,Keratin-positive tumor,1,Unidentified,0
+dummy_most_frequent,6,Keratin-positive tumor,2,Immune,0
+dummy_most_frequent,6,Keratin-positive tumor,3,Endothelial,0
+dummy_most_frequent,6,Keratin-positive tumor,4,Mesenchymal-like,0
+dummy_most_frequent,6,Keratin-positive tumor,5,Tumor,0
+logistic_regression,6,Keratin-positive tumor,5,Tumor,789
+logistic_regression,2,Immune,4,Mesenchymal-like,607
+logistic_regression,2,Immune,6,Keratin-positive tumor,376
+logistic_regression,6,Keratin-positive tumor,2,Immune,326
+logistic_regression,6,Keratin-positive tumor,4,Mesenchymal-like,320
+logistic_regression,2,Immune,1,Unidentified,259
+logistic_regression,2,Immune,3,Endothelial,128
+logistic_regression,6,Keratin-positive tumor,1,Unidentified,59
+logistic_regression,6,Keratin-positive tumor,3,Endothelial,54
+logistic_regression,2,Immune,5,Tumor,51
+logistic_regression,4,Mesenchymal-like,5,Tumor,35
+logistic_regression,4,Mesenchymal-like,1,Unidentified,30
+logistic_regression,4,Mesenchymal-like,3,Endothelial,28
+logistic_regression,5,Tumor,1,Unidentified,17
+logistic_regression,4,Mesenchymal-like,2,Immune,11
+logistic_regression,1,Unidentified,4,Mesenchymal-like,6
+logistic_regression,4,Mesenchymal-like,6,Keratin-positive tumor,3
+logistic_regression,3,Endothelial,2,Immune,3
+logistic_regression,5,Tumor,4,Mesenchymal-like,2
+logistic_regression,5,Tumor,2,Immune,2
+logistic_regression,3,Endothelial,4,Mesenchymal-like,2
+logistic_regression,3,Endothelial,1,Unidentified,1
+logistic_regression,5,Tumor,6,Keratin-positive tumor,1
+logistic_regression,3,Endothelial,5,Tumor,0
+logistic_regression,1,Unidentified,5,Tumor,0
+logistic_regression,1,Unidentified,6,Keratin-positive tumor,0
+logistic_regression,1,Unidentified,3,Endothelial,0
+logistic_regression,1,Unidentified,2,Immune,0
+logistic_regression,3,Endothelial,6,Keratin-positive tumor,0
+logistic_regression,5,Tumor,3,Endothelial,0
+random_forest,2,Immune,6,Keratin-positive tumor,424
+random_forest,6,Keratin-positive tumor,2,Immune,387
+random_forest,4,Mesenchymal-like,2,Immune,65
+random_forest,2,Immune,4,Mesenchymal-like,31
+random_forest,2,Immune,5,Tumor,26
+random_forest,5,Tumor,2,Immune,22
+random_forest,2,Immune,3,Endothelial,19
+random_forest,6,Keratin-positive tumor,4,Mesenchymal-like,18
+random_forest,4,Mesenchymal-like,3,Endothelial,17
+random_forest,6,Keratin-positive tumor,3,Endothelial,16
+random_forest,3,Endothelial,2,Immune,14
+random_forest,4,Mesenchymal-like,5,Tumor,14
+random_forest,6,Keratin-positive tumor,1,Unidentified,10
+random_forest,2,Immune,1,Unidentified,9
+random_forest,1,Unidentified,4,Mesenchymal-like,7
+random_forest,5,Tumor,4,Mesenchymal-like,6
+random_forest,1,Unidentified,5,Tumor,5
+random_forest,6,Keratin-positive tumor,5,Tumor,2
+random_forest,3,Endothelial,1,Unidentified,1
+random_forest,3,Endothelial,4,Mesenchymal-like,1
+random_forest,4,Mesenchymal-like,1,Unidentified,1
+random_forest,3,Endothelial,5,Tumor,1
+random_forest,5,Tumor,6,Keratin-positive tumor,1
+random_forest,4,Mesenchymal-like,6,Keratin-positive tumor,1
+random_forest,1,Unidentified,6,Keratin-positive tumor,0
+random_forest,1,Unidentified,2,Immune,0
+random_forest,1,Unidentified,3,Endothelial,0
+random_forest,3,Endothelial,6,Keratin-positive tumor,0
+random_forest,5,Tumor,1,Unidentified,0
+random_forest,5,Tumor,3,Endothelial,0
+hist_gradient_boosting,6,Keratin-positive tumor,2,Immune,134
+hist_gradient_boosting,2,Immune,6,Keratin-positive tumor,99
+hist_gradient_boosting,6,Keratin-positive tumor,1,Unidentified,16
+hist_gradient_boosting,4,Mesenchymal-like,2,Immune,14
+hist_gradient_boosting,2,Immune,3,Endothelial,14
+hist_gradient_boosting,2,Immune,4,Mesenchymal-like,12
+hist_gradient_boosting,5,Tumor,4,Mesenchymal-like,12
+hist_gradient_boosting,3,Endothelial,2,Immune,10
+hist_gradient_boosting,3,Endothelial,4,Mesenchymal-like,9
+hist_gradient_boosting,5,Tumor,2,Immune,7
+hist_gradient_boosting,4,Mesenchymal-like,3,Endothelial,7
+hist_gradient_boosting,2,Immune,5,Tumor,7
+hist_gradient_boosting,2,Immune,1,Unidentified,5
+hist_gradient_boosting,1,Unidentified,4,Mesenchymal-like,3
+hist_gradient_boosting,6,Keratin-positive tumor,3,Endothelial,2
+hist_gradient_boosting,1,Unidentified,2,Immune,2
+hist_gradient_boosting,3,Endothelial,6,Keratin-positive tumor,2
+hist_gradient_boosting,4,Mesenchymal-like,1,Unidentified,2
+hist_gradient_boosting,1,Unidentified,5,Tumor,2
+hist_gradient_boosting,5,Tumor,6,Keratin-positive tumor,1
+hist_gradient_boosting,4,Mesenchymal-like,5,Tumor,1
+hist_gradient_boosting,3,Endothelial,5,Tumor,1
+hist_gradient_boosting,4,Mesenchymal-like,6,Keratin-positive tumor,1
+hist_gradient_boosting,3,Endothelial,1,Unidentified,0
+hist_gradient_boosting,1,Unidentified,3,Endothelial,0
+hist_gradient_boosting,1,Unidentified,6,Keratin-positive tumor,0
+hist_gradient_boosting,5,Tumor,1,Unidentified,0
+hist_gradient_boosting,5,Tumor,3,Endothelial,0
+hist_gradient_boosting,6,Keratin-positive tumor,4,Mesenchymal-like,0
+hist_gradient_boosting,6,Keratin-positive tumor,5,Tumor,0
