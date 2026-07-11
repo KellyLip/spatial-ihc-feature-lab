@@ -265,9 +265,9 @@ def plot_distance_distribution(
     plt.figure(figsize=(16, 6))
 
     plt.boxplot(
-        distance_groups,
-        labels=plotted_sample_ids,
-        showfliers=False,
+    distance_groups,
+    tick_labels=plotted_sample_ids,
+    showfliers=False,
     )
 
     plt.xlabel("Sample ID")
@@ -336,8 +336,16 @@ def run_qc(
     print("\nSamples with zero source cells:")
 
     for column in source_count_columns:
-        zero_count = int((features_df[column] == 0).sum())
-        print(f"{column}: {zero_count}")
+        zero_samples = features_df.loc[
+            features_df[column].eq(0),
+            "SampleID",
+        ].tolist()
+
+        if zero_samples:
+            print(
+                f"{column}: {len(zero_samples)} samples"
+                f" -> {zero_samples}"
+            )
 
 
 def main() -> None:
