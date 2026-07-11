@@ -17,6 +17,7 @@ dependencies:
   - networkx
   - shap
   - streamlit
+  - pytest
   - pytorch
   - torchvision
   - pip
