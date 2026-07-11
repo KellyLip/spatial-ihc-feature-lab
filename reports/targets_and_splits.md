@@ -80,14 +80,16 @@ patient/sample
 
 Input features:
 
-future ROI/sample-level spatial features, such as:
+ROI/sample-level spatial features, including:
 
 - immune/tumor cell proportions
-- immune-tumor nearest-neighbor distances
+- immune-tumor nearest-neighbor distances (see `build_mibi_distance_features.py`)
 - immune-tumor contact counts
 - CD8-to-tumor proximity
 - macrophage-to-tumor proximity
 - graph/neighborhood features
+
+Initial distance features (CD8 / macrophage / B cell → nearest tumor) are available in `data/processed/mibi_distance_features.csv` and summarized in [`distance_features_report.md`](distance_features_report.md).
 
 Split rule:
 

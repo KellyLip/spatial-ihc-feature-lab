@@ -13,6 +13,8 @@ For the rationale behind dataset choices, see [`reports/dataset_rationale.md`](r
 
 For prediction targets and split strategy, see [`reports/targets_and_splits.md`](reports/targets_and_splits.md).
 
+For immune–tumor distance feature results, see [`reports/distance_features_report.md`](reports/distance_features_report.md).
+
 ## Repository Layout
 
 ```text
@@ -24,10 +26,12 @@ spatial-ihc-feature-lab/
     metrics/             Model evaluation metrics (CSV)
     tables/              QC summaries, EDA tables, and split summaries
     cell_classifier_report.md  Summary of cell phenotype baseline results
+    distance_features_report.md  Summary of immune–tumor distance features
     dataset_rationale.md Project note on MIBI vs MIHIC strategy
     targets_and_splits.md Prediction targets and leakage-safe split rules
   src/
     data/                MIBI-TNBC data preparation and QC scripts
+    features/            Spatial feature engineering (distances, etc.)
     models/              Supervised ML training scripts
     utils/               Shared utilities (train/val/test splits)
   environment.yml        Conda environment definition
@@ -54,6 +58,7 @@ python src/data/make_mibi_spatial_table.py
 python src/data/check_mibi_master_table.py
 python src/data/make_mibi_splits.py
 python src/models/train_mibi_cell_classifier.py
+python src/features/build_mibi_distance_features.py
 ```
 
 | Step | Script | Output |
@@ -63,8 +68,9 @@ python src/models/train_mibi_cell_classifier.py
 | 3 | `check_mibi_master_table.py` | QC tables in `reports/tables/` and summary figures in `reports/figures/` |
 | 4 | `make_mibi_splits.py` | `data/processed/mibi_cells_with_splits.csv` and `reports/tables/split_summary.csv` |
 | 5 | `train_mibi_cell_classifier.py` | Baseline metrics in `reports/metrics/`, confusion matrices in `reports/figures/`, top confusions in `reports/tables/` |
+| 6 | `build_mibi_distance_features.py` | Sample-level distance features, cell-level distances, summary table, and per-sample boxplots |
 
-Shared label mappings (`patient_class`, cell groups, immune groups) live in `src/data/mibi_constants.py`. Leakage-safe split utilities live in `src/utils/splits.py`.
+Shared label mappings (`patient_class`, cell groups, immune groups) live in `src/data/mibi_constants.py`. Leakage-safe split utilities live in `src/utils/splits.py`. Nearest-neighbor distance helpers live in `src/features/spatial_distances.py`.
 
 ### Master table
 
@@ -144,6 +150,29 @@ Outputs:
 
 See [`reports/cell_classifier_report.md`](reports/cell_classifier_report.md) for interpretation of remaining errors and model comparison notes.
 
+### Immune–tumor distance features
+
+After splits exist, build sample-level nearest-neighbor distances from immune populations to tumor cells:
+
+```bash
+python src/features/build_mibi_distance_features.py
+```
+
+For each of the 40 samples, the script measures distance from every CD8 T cell, macrophage, and B cell to the nearest tumor cell (`tumorYN == 1`), then aggregates mean, median, and percentiles (p10–p90) in pixels and approximate micrometers (`0.39 µm/pixel`).
+
+Median CD8→tumor distance is about **11 µm** overall; compartmentalized samples sit farther from tumor (median ≈ 14 µm) than mixed (≈ 10 µm) or cold samples with any CD8 cells (≈ 9 µm). Macrophage→tumor distances follow the same pattern. B cells are sparse in many samples (11 samples have none), so those features are often missing and should be used carefully downstream.
+
+Outputs:
+
+* `data/processed/mibi_distance_features.csv` — one feature row per sample
+* `data/processed/mibi_cell_to_tumor_distances.csv` — one row per immune cell distance
+* `reports/tables/mibi_distance_features_summary.csv` — copy of the sample-level table for reporting
+* `reports/figures/cd8_to_tumor_distance_by_sample.png`
+* `reports/figures/macrophage_to_tumor_distance_by_sample.png`
+* `reports/figures/b_cell_to_tumor_distance_by_sample.png`
+
+See [`reports/distance_features_report.md`](reports/distance_features_report.md) for a short interpretation of these results.
+
 ## Notebooks
 
 | Notebook | Purpose |
@@ -158,11 +187,11 @@ Run notebooks from the `notebooks/` directory or ensure the project root resolve
 
 ## Generated Reports
 
-**Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, cell-classifier confusion matrices, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
+**Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, cell-classifier confusion matrices, immune–tumor distance boxplots by sample, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
 
 **Metrics** (`reports/metrics/`): cell phenotype classifier baseline and per-class classification reports.
 
-**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, cell–mask overlap QC, `split_summary.csv`, and cell-classifier top confusions.
+**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, cell–mask overlap QC, `split_summary.csv`, cell-classifier top confusions, and `mibi_distance_features_summary.csv`.
 
 ## Current Status
 
@@ -175,8 +204,9 @@ Completed for MIBI-TNBC:
 * Prediction target definition and leakage-safe split strategy (`reports/targets_and_splits.md`)
 * Stratified sample-level train/val/test splits (`make_mibi_splits.py`, `src/utils/splits.py`)
 * Cell phenotype baseline classifier from marker expression (`train_mibi_cell_classifier.py`)
+* Nearest-neighbor immune–tumor distance features (`spatial_distances.py`, `build_mibi_distance_features.py`)
 
 Planned next steps:
 
-* Spatial feature engineering (distances, neighborhood densities, graphs)
+* Additional spatial features (neighborhood densities, contact fractions, graphs)
 * Interpretable ML models for `patient_class` prediction using sample-level spatial features
