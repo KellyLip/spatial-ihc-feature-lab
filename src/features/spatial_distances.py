@@ -52,7 +52,7 @@ def get_cells(
 
             marker_positive=("PD1", 0.5)
 
-        Marker positivity is supported for later work, but the first Week 4
+        Marker positivity is supported for later work, but the initial
         features use the existing cell labels rather than arbitrary marker
         thresholds.
 

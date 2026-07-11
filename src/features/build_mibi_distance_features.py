@@ -433,7 +433,7 @@ def main() -> None:
         ),
     )
 
-    print("\nWeek 4 distance-feature build complete.")
+    print("\nDistance-feature build complete.")
 
 
 if __name__ == "__main__":
