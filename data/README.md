@@ -68,6 +68,7 @@ data/
     mibi_cells_with_splits.csv
     mibi_distance_features.csv
     mibi_cell_to_tumor_distances.csv
+    mibi_roi_features.csv
 ```
 
 Processed files under `data/processed/` are generated locally by the pipeline in `src/data/` and `src/features/` and are not committed to Git.
@@ -126,6 +127,7 @@ python src/data/extract_mibi_centroids.py
 python src/data/make_mibi_spatial_table.py
 python src/data/make_mibi_splits.py
 python src/features/build_mibi_distance_features.py
+python src/features/build_mibi_roi_features.py
 ```
 
 | File | Description |
@@ -135,6 +137,7 @@ python src/features/build_mibi_distance_features.py
 | `mibi_cells_with_splits.csv` | Master table plus a `split` column (`train` / `val` / `test`) assigned by `SampleID` |
 | `mibi_distance_features.csv` | Sample-level nearest-neighbor distance summaries (CD8 / macrophage / B cell → tumor) |
 | `mibi_cell_to_tumor_distances.csv` | Cell-level distances from each immune source cell to the nearest tumor cell |
+| `mibi_roi_features.csv` | Sample-level ROI features: radius contacts, composition, FOV densities, and merged µm distances |
 
 The master table retains **40** samples: all labeled samples except sample 30 (no `cellData` rows) and samples 42–44 (excluded explicitly; no patient-class label).
 
@@ -159,6 +162,18 @@ Created by `src/features/build_mibi_distance_features.py` using helpers in `src/
 For each sample, distances are computed from CD8 T cells (`immuneGroup == 3`), macrophages (`immuneGroup == 8`), and B cells (`immuneGroup == 6`) to the nearest tumor cell (`tumorYN == 1`). Summaries (mean, median, p10/p25/p75/p90) are stored in pixels and approximate micrometers.
 
 A reporting copy of the sample-level table is written to `reports/tables/mibi_distance_features_summary.csv`. Interpretation notes are in [`reports/distance_features_report.md`](../reports/distance_features_report.md).
+
+### Contact, density, and composition ROI features
+
+Created by `src/features/build_mibi_roi_features.py` using helpers in `src/features/contact_features.py`. Requires `mibi_cells_with_splits.csv` and `mibi_distance_features.csv`.
+
+For each sample, the script builds:
+
+* radius-neighbor contact summaries at 20 / 50 / 100 µm for immune↔tumor and selected immune→tumor pairs
+* composition counts, proportions, approximate FOV densities (`density_per_fov_mm2`), and selected ratios
+* merged micrometer distance features from `mibi_distance_features.csv`
+
+A reporting copy is written to `reports/tables/mibi_roi_features_summary.csv`, with a feature heatmap at `reports/figures/mibi_roi_feature_heatmap.png`. Definitions, missing-value notes, and QC are in [`reports/contact_density_features_report.md`](../reports/contact_density_features_report.md).
 
 ## Data QC
 
