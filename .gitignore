@@ -246,6 +246,10 @@ data/processed/*
 /models/
 checkpoints/
 
-# 4. Logs
+# 4. Generated report tables and metrics (CSV)
+# Keep markdown reports and figure PNGs; regenerate CSVs locally from scripts.
+reports/**/*.csv
+
+# 5. Logs
 logs/
 *.log
