@@ -17,6 +17,8 @@ For immune–tumor distance feature results, see [`reports/distance_features_rep
 
 For contact, density, and composition ROI features, see [`reports/contact_density_features_report.md`](reports/contact_density_features_report.md).
 
+For the sample-level spatial architecture classifier, see [`reports/spatial_classifier_report.md`](reports/spatial_classifier_report.md).
+
 ## Repository Layout
 
 ```text
@@ -25,11 +27,12 @@ spatial-ihc-feature-lab/
   notebooks/             Exploratory analysis and QC notebooks
   reports/
     figures/             Generated plots from scripts and notebooks
-    metrics/             Model evaluation metrics (CSV)
-    tables/              QC summaries, EDA tables, and split summaries
+    metrics/             Model evaluation metrics (CSV; gitignored)
+    tables/              QC summaries, EDA tables, and split summaries (CSV; gitignored)
     cell_classifier_report.md  Summary of cell phenotype baseline results
     distance_features_report.md  Summary of immune–tumor distance features
     contact_density_features_report.md  Contact, density, and composition ROI features
+    spatial_classifier_report.md  Sample-level patient_class architecture classifier
     dataset_rationale.md Project note on MIBI vs MIHIC strategy
     targets_and_splits.md Prediction targets and leakage-safe split rules
   src/
@@ -50,7 +53,7 @@ conda env create -f environment.yml
 conda activate spatial-ihc
 ```
 
-Download the MIBI-TNBC processed data locally and place files under `data/raw/mibi_tnbc/` as described in [`data/README.md`](data/README.md). Raw CSVs, TIFF masks, and processed tables are gitignored.
+Download the MIBI-TNBC processed data locally and place files under `data/raw/mibi_tnbc/` as described in [`data/README.md`](data/README.md). Raw CSVs, TIFF masks, processed tables, and generated report CSVs under `reports/` are gitignored. Markdown reports and selected figure PNGs may be tracked.
 
 ## MIBI-TNBC Workflow
 
@@ -64,6 +67,8 @@ python src/data/make_mibi_splits.py
 python src/models/train_mibi_cell_classifier.py
 python src/features/build_mibi_distance_features.py
 python src/features/build_mibi_roi_features.py
+python src/models/train_mibi_spatial_classifier.py
+python src/models/rank_mibi_spatial_features.py
 ```
 
 | Step | Script | Output |
@@ -75,6 +80,8 @@ python src/features/build_mibi_roi_features.py
 | 5 | `train_mibi_cell_classifier.py` | Baseline metrics in `reports/metrics/`, confusion matrices in `reports/figures/`, top confusions in `reports/tables/` |
 | 6 | `build_mibi_distance_features.py` | Sample-level distance features, cell-level distances, summary table, and per-sample boxplots |
 | 7 | `build_mibi_roi_features.py` | Sample-level ROI feature table (contacts, composition, densities + merged distances), summary table, and feature heatmap |
+| 8 | `train_mibi_spatial_classifier.py` | Sample-level `patient_class` CV/test metrics, predictions, and confusion matrix |
+| 9 | `rank_mibi_spatial_features.py` | Cross-validated permutation importance ranking and figure |
 
 Shared label mappings (`patient_class`, cell groups, immune groups) live in `src/data/mibi_constants.py`. Leakage-safe split utilities live in `src/utils/splits.py`. Nearest-neighbor distance helpers live in `src/features/spatial_distances.py`. Radius-neighbor contact helpers live in `src/features/contact_features.py`.
 
@@ -203,6 +210,39 @@ Outputs:
 
 See [`reports/contact_density_features_report.md`](reports/contact_density_features_report.md) for feature definitions, missing-value notes, and QC checks. Contact helpers are covered by `tests/test_contact_features.py`.
 
+### Spatial architecture classifier
+
+After distance features exist, train the primary sample-level model that predicts tumor–immune architecture (`patient_class`: mixed / compartmentalized / cold):
+
+```bash
+python src/models/train_mibi_spatial_classifier.py
+python src/models/rank_mibi_spatial_features.py
+```
+
+The classifier uses one row per sample from `data/processed/mibi_distance_features.csv` (40 samples). Feature sets compared:
+
+* **count-only** — cell counts and fractions (tumor, CD8, macrophage, B cell)
+* **distance-only** — micrometer nearest-neighbor distance summaries plus population-absence indicators
+* **combined** — counts and distances together (pixel-distance columns excluded as duplicates)
+
+Existing sample-level train / validation / test assignments are retained. For model selection, train and validation are pooled into a 32-sample development set; the 8 test samples stay untouched. Comparison uses repeated stratified five-fold CV (three repeats) with macro F1 as the selection metric. Models: dummy most-frequent, elastic-net logistic regression, random forest, and histogram gradient boosting. Median imputation runs inside each pipeline; logistic regression inputs are standardized.
+
+Selected model on CV (mean macro F1): **HistGradientBoosting + combined features** (≈ 0.804). Held-out test: accuracy 0.625, balanced accuracy 0.722, macro F1 0.714. Errors were only between mixed and compartmentalized. Permutation importance highlighted `tumor_fraction` and `cd8_to_tumor_mean_um` as leading composition and spatial signals.
+
+This baseline still uses distance summaries rather than the full contact/density ROI table; richer neighborhood features are a natural next step.
+
+Outputs:
+
+* `reports/metrics/spatial_classifier_cv_metrics.csv`
+* `reports/metrics/spatial_classifier_test_metrics.csv`
+* `reports/metrics/spatial_classifier_classification_report.csv`
+* `reports/tables/spatial_classifier_predictions.csv`
+* `reports/tables/spatial_classifier_feature_ranking.csv`
+* `reports/figures/spatial_classifier_confusion_matrix.png`
+* `reports/figures/spatial_classifier_feature_importance.png`
+
+See [`reports/spatial_classifier_report.md`](reports/spatial_classifier_report.md) for full CV tables, error analysis, and limitations.
+
 ## Notebooks
 
 | Notebook | Purpose |
@@ -217,11 +257,11 @@ Run notebooks from the `notebooks/` directory or ensure the project root resolve
 
 ## Generated Reports
 
-**Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, cell-classifier confusion matrices, immune–tumor distance boxplots by sample, ROI feature heatmap, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
+**Figures** (`reports/figures/`): cells per sample, patient-class and cell-type distributions, tumor status, spatial sanity checks, cell-classifier confusion matrices, immune–tumor distance boxplots by sample, ROI feature heatmap, spatial architecture confusion matrix and feature-importance plot, and notebook-specific EDA plots under `reports/figures/eda_notebook/`.
 
-**Metrics** (`reports/metrics/`): cell phenotype classifier baseline and per-class classification reports.
+**Metrics** (`reports/metrics/`, gitignored CSVs): cell phenotype classifier baselines; spatial architecture CV/test metrics and classification reports. Regenerate by re-running the training scripts.
 
-**Tables** (`reports/tables/`): missing-value summaries, per-sample summaries, cell–mask overlap QC, `split_summary.csv`, cell-classifier top confusions, `mibi_distance_features_summary.csv`, and `mibi_roi_features_summary.csv`.
+**Tables** (`reports/tables/`, gitignored CSVs): missing-value summaries, per-sample summaries, cell–mask overlap QC, `split_summary.csv`, cell-classifier top confusions, distance/ROI feature summaries, spatial-classifier predictions, and feature rankings.
 
 ## Current Status
 
@@ -236,8 +276,9 @@ Completed for MIBI-TNBC:
 * Cell phenotype baseline classifier from marker expression (`train_mibi_cell_classifier.py`)
 * Nearest-neighbor immune–tumor distance features (`spatial_distances.py`, `build_mibi_distance_features.py`)
 * Contact, density, and composition ROI features (`contact_features.py`, `build_mibi_roi_features.py`)
+* Sample-level spatial architecture classifier for `patient_class` (`train_mibi_spatial_classifier.py`, `rank_mibi_spatial_features.py`)
 
 Planned next steps:
 
+* Retrain or extend the architecture model with contact, density, boundary, and neighborhood features from `mibi_roi_features.csv`
 * Additional spatial features (graphs, richer neighborhood descriptors)
-* Interpretable ML models for `patient_class` prediction using sample-level spatial features

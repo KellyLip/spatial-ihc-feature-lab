@@ -2,7 +2,7 @@
 
 This folder documents the datasets used by this repository and explains how to obtain them manually.
 
-Raw data files are not tracked by Git. Large CSV files, TIFF images, raw image folders, and derived processed files should remain local under `data/raw/` or `data/processed/`.
+Raw data files are not tracked by Git. Large CSV files, TIFF images, raw image folders, and derived processed files should remain local under `data/raw/` or `data/processed/`. Generated CSV tables and metrics under `reports/tables/` and `reports/metrics/` are also gitignored; regenerate them by re-running the pipeline scripts.
 
 ## MIBI-TNBC processed data
 
@@ -174,6 +174,12 @@ For each sample, the script builds:
 * merged micrometer distance features from `mibi_distance_features.csv`
 
 A reporting copy is written to `reports/tables/mibi_roi_features_summary.csv`, with a feature heatmap at `reports/figures/mibi_roi_feature_heatmap.png`. Definitions, missing-value notes, and QC are in [`reports/contact_density_features_report.md`](../reports/contact_density_features_report.md).
+
+### Spatial architecture modeling inputs
+
+The sample-level architecture classifier (`src/models/train_mibi_spatial_classifier.py`) currently reads `mibi_distance_features.csv` (counts, fractions, and micrometer nearest-neighbor distance summaries). Feature ranking uses the same table (`src/models/rank_mibi_spatial_features.py`).
+
+`mibi_roi_features.csv` is the broader contact/density/composition table intended for follow-on models that incorporate radius-neighbor features beyond nearest-neighbor distances. Modeling results are summarized in [`reports/spatial_classifier_report.md`](../reports/spatial_classifier_report.md).
 
 ## Data QC
 
